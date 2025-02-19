@@ -6,7 +6,7 @@ on:
     branches:
       - "main"
   workflow_dispatch:
-    
+
 jobs:
   Spec:
     uses: "puppetlabs/cat-github-actions/.github/workflows/module_ci.yml@main"
@@ -52,11 +52,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.setup_matrix.outputs.matrix)}}
-    
+
     env:
       PUPPET_GEM_VERSION: '~> 7.24'
       FACTER_GEM_VERSION: 'https://github.com/puppetlabs/facter#main'
-    
+
     steps:
     - name: Checkout Source
       uses: actions/checkout@v3
@@ -71,10 +71,10 @@ jobs:
       run: |
         bundle env
 
-    - name: "Disable mysqld apparmor profile"	
+    - name: "Disable mysqld apparmor profile"
       if: ${{matrix.platforms.provider == 'docker'}}
       run: |
-        sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/	
+        sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
         sudo apparmor_parser -R /etc/apparmor.d/disable/usr.sbin.mysqld
         sudo systemctl disable apparmor
         sudo systemctl stop apparmor
