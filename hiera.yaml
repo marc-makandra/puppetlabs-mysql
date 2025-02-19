@@ -8,7 +8,7 @@ defaults:  # Used for any hierarchy level that omits these keys.
 hierarchy:
   - name: "osfamily/major release"
     paths:
-        # Used to distinguish between Debian and Ubuntu
+      # Used to distinguish between Debian and Ubuntu
       - "os/%{facts.os.name}/%{facts.os.release.major}.yaml"
       - "os/%{facts.os.family}/%{facts.os.release.major}.yaml"
   - name: "osfamily"

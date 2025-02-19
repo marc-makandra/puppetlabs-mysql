@@ -9,7 +9,7 @@ rubocop.yml:
 
 spec/spec_helper.rb:
   spec_overrides:
-  - require 'spec_helper_local'
+    - require 'spec_helper_local'
   coverage_report: true
 "  changelog_user": puppetlabs
 .gitpod.Dockerfile:

@@ -21,25 +21,25 @@ jobs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
     steps:
-    - name: Checkout Source
-      uses: actions/checkout@v3
+      - name: Checkout Source
+        uses: actions/checkout@v3
 
-    - name: Activate Ruby 2.7
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: "2.7"
-        bundler-cache: true
+      - name: Activate Ruby 2.7
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.7"
+          bundler-cache: true
 
-    - name: Print bundle environment
-      run: |
-        echo ::group::bundler environment
-        bundle env
-        echo ::endgroup::
+      - name: Print bundle environment
+        run: |
+          echo ::group::bundler environment
+          bundle env
+          echo ::endgroup::
 
-    - name: Setup Acceptance Test Matrix
-      id: get-matrix
-      run: |
-        bundle exec matrix_from_metadata_v2 --exclude-platforms '["Debian-12-arm", "Ubuntu-22.04-arm", "RedHat-9-arm"]'
+      - name: Setup Acceptance Test Matrix
+        id: get-matrix
+        run: |
+          bundle exec matrix_from_metadata_v2 --exclude-platforms '["Debian-12-arm", "Ubuntu-22.04-arm", "RedHat-9-arm"]'
 
   Acceptance:
     name: "${{matrix.platforms.label}}, ${{matrix.collection}}"
@@ -57,47 +57,47 @@ jobs:
       FACTER_GEM_VERSION: 'https://github.com/puppetlabs/facter#main'
 
     steps:
-    - name: Checkout Source
-      uses: actions/checkout@v3
+      - name: Checkout Source
+        uses: actions/checkout@v3
 
-    - name: Activate Ruby 2.7
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: "2.7"
-        bundler-cache: true
+      - name: Activate Ruby 2.7
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.7"
+          bundler-cache: true
 
-    - name: Print bundle environment
-      run: |
-        bundle env
+      - name: Print bundle environment
+        run: |
+          bundle env
 
-    - name: "Disable mysqld apparmor profile"
-      if: ${{matrix.platforms.provider == 'docker'}}
-      run: |
-        sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
-        sudo apparmor_parser -R /etc/apparmor.d/disable/usr.sbin.mysqld
-        sudo systemctl disable apparmor
-        sudo systemctl stop apparmor
+      - name: "Disable mysqld apparmor profile"
+        if: ${{matrix.platforms.provider == 'docker'}}
+        run: |
+          sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
+          sudo apparmor_parser -R /etc/apparmor.d/disable/usr.sbin.mysqld
+          sudo systemctl disable apparmor
+          sudo systemctl stop apparmor
 
-    - name: Provision test environment
-      run: |
-        bundle exec rake 'litmus:provision[${{matrix.platforms.provider}},${{ matrix.platforms.image }}]'
-        FILE='spec/fixtures/litmus_inventory.yaml'
-        sed -e 's/password: .*/password: "[redacted]"/' < $FILE || true
+      - name: Provision test environment
+        run: |
+          bundle exec rake 'litmus:provision[${{matrix.platforms.provider}},${{ matrix.platforms.image }}]'
+          FILE='spec/fixtures/litmus_inventory.yaml'
+          sed -e 's/password: .*/password: "[redacted]"/' < $FILE || true
 
-    - name: Install agent
-      run: |
-        bundle exec rake 'litmus:install_agent[${{ matrix.collection }}]'
+      - name: Install agent
+        run: |
+          bundle exec rake 'litmus:install_agent[${{ matrix.collection }}]'
 
-    - name: Install module
-      run: |
-        bundle exec rake 'litmus:install_module'
+      - name: Install module
+        run: |
+          bundle exec rake 'litmus:install_module'
 
-    - name: Run acceptance tests
-      run: |
-        bundle exec rake 'litmus:acceptance:parallel'
+      - name: Run acceptance tests
+        run: |
+          bundle exec rake 'litmus:acceptance:parallel'
 
-    - name: Remove test environment
-      if: ${{ always() }}
-      continue-on-error: true
-      run: |
-        bundle exec rake 'litmus:tear_down'
+      - name: Remove test environment
+        if: ${{ always() }}
+        continue-on-error: true
+        run: |
+          bundle exec rake 'litmus:tear_down'
